@@ -1,18 +1,36 @@
 import { GoogleGenAI, GenerateContentResponse, Content } from "@google/genai";
 import { ChatMessage } from "../types";
 
-const apiKey = process.env.API_KEY || '';
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+const isKeyValid = apiKey && apiKey !== 'your_gemini_api_key_here';
 
-// Initialize Gemini client
-const ai = new GoogleGenAI({ apiKey });
+// Lazy initializer for Gemini client to prevent top-level browser crashes
+let aiInstance: GoogleGenAI | null = null;
+const getAi = () => {
+  if (aiInstance) return aiInstance;
+  if (isKeyValid) {
+    try {
+      aiInstance = new GoogleGenAI(apiKey);
+      return aiInstance;
+    } catch (e) {
+      console.error("Failed to initialize GoogleGenAI:", e);
+    }
+  }
+  return null;
+};
 
 export const generateChatResponse = async (
   history: ChatMessage[],
   userMessage: string,
   imageBase64?: string
 ): Promise<string> => {
+  const ai = getAi();
+  if (!ai) {
+    return "The AI assistant is currently unavailable because a valid Gemini API key was not found. Please add your key to the .env file.";
+  }
+
   try {
-    const model = 'gemini-2.5-flash';
+    const model = 'gemini-1.5-flash';
 
     // 1. Format History for the API
     // We strictly map the existing chat messages to the format Gemini expects.

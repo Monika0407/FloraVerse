@@ -5,17 +5,25 @@ import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 
 const Cart: React.FC = () => {
   const { cart, removeFromCart, placeOrder, user } = useStore();
+  const [isProcessing, setIsProcessing] = React.useState(false);
   const navigate = useNavigate();
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantityOrdered), 0);
 
-  const handleCheckout = () => {
-    placeOrder();
-    navigate('/buyer-dashboard');
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    const success = await placeOrder();
+    setIsProcessing(false);
+    if (success) {
+      alert("Payment Successful! Your order has been placed.");
+      navigate('/buyer-dashboard');
+    } else {
+      alert("Payment failed or an error occurred.");
+    }
   };
 
   if (!user || user.role !== 'buyer') {
-     return <div className="p-8 text-center">Please login as a buyer to view cart.</div>;
+    return <div className="p-8 text-center">Please login as a buyer to view cart.</div>;
   }
 
   return (
@@ -29,7 +37,7 @@ const Cart: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-10 text-center">
           <p className="text-xl text-gray-500 mb-6">Your cart is empty.</p>
           <Link to="/buyer-dashboard" className="text-flora-600 font-medium hover:text-flora-800 flex items-center justify-center">
-             <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
+            <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
           </Link>
         </div>
       ) : (
@@ -37,9 +45,9 @@ const Cart: React.FC = () => {
           <ul className="divide-y divide-gray-200">
             {cart.map((item) => (
               <li key={item.id} className="p-6 flex items-center">
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.name} 
+                <img
+                  src={item.imageUrl}
+                  alt={item.name}
                   className="h-20 w-20 object-cover rounded-md border border-gray-200"
                 />
                 <div className="ml-6 flex-1">
@@ -63,7 +71,7 @@ const Cart: React.FC = () => {
               </li>
             ))}
           </ul>
-          
+
           <div className="bg-gray-50 px-6 py-6 border-t border-gray-200">
             <div className="flex justify-between text-base font-medium text-gray-900 mb-4">
               <p>Subtotal</p>
@@ -74,9 +82,10 @@ const Cart: React.FC = () => {
             </p>
             <button
               onClick={handleCheckout}
-              className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-flora-600 hover:bg-flora-700"
+              disabled={isProcessing}
+              className={`w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white ${isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-flora-600 hover:bg-flora-700'}`}
             >
-              Buy Now & Notify Seller
+              {isProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
             </button>
             <div className="mt-6 flex justify-center text-sm text-center text-gray-500">
               <p>
