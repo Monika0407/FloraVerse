@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const Product = require('./models/Product');
 const Order = require('./models/Order');
+const User = require('./models/User');
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,35 @@ if (!MONGODB_URI) {
             console.error('Error details:', err.message);
         });
 }
+
+// Auth Routes
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+        const user = new User({ name, email, password, role });
+        const newUser = await user.save();
+        res.status(201).json(newUser);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email, password });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 // Product Routes
 app.get('/api/products', async (req, res) => {

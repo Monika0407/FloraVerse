@@ -10,8 +10,8 @@ interface StoreContextType {
   cart: CartItem[];
   notifications: Notification[];
   loading: boolean;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string, role: UserRole) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
   logout: () => void;
   addProduct: (product: Omit<Product, 'id' | 'sellerId'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
@@ -34,15 +34,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
-    try {
-      const saved = localStorage.getItem('flora_users_db');
-      return saved ? JSON.parse(saved) : [];
-    } catch (err) {
-      console.error("Failed to parse users_db from localStorage", err);
-      return [];
-    }
-  });
+
 
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -104,38 +96,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     else localStorage.removeItem('flora_user');
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('flora_users_db', JSON.stringify(registeredUsers));
-  }, [registeredUsers]);
+
 
   useEffect(() => {
     localStorage.setItem('flora_cart', JSON.stringify(cart));
   }, [cart]);
 
   // Actions
-  const login = (email: string, password: string): boolean => {
-    const foundUser = registeredUsers.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      setUser(foundUser);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+      const user = { ...res.data, id: res.data._id };
+      setUser(user);
       return true;
-    }
-    return false;
-  };
-
-  const register = (name: string, email: string, password: string, role: UserRole): boolean => {
-    if (registeredUsers.some(u => u.email === email)) {
+    } catch (err) {
+      console.error("Login failed", err);
       return false;
     }
-    const newUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name,
-      email,
-      role,
-      password
-    };
-    setRegisteredUsers(prev => [...prev, newUser]);
-    setUser(newUser);
-    return true;
+  };
+
+  const register = async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password, role });
+      const user = { ...res.data, id: res.data._id };
+      setUser(user);
+      return true;
+    } catch (err) {
+      console.error("Registration failed", err);
+      return false;
+    }
   };
 
   const logout = () => {

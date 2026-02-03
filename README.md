@@ -20,19 +20,17 @@ FloraVerse is a comprehensive digital ecosystem designed for plant enthusiasts. 
 
 ## 🛠️ Tech Stack
 
-*   **Core**: React 19, TypeScript
-*   **Build Tool**: Vite
-*   **Styling**: Tailwind CSS
-*   **State Management**: React Context API
-*   **Routing**: React Router DOM
-*   **AI Integration**: Google Gemini 2.5 Flash
+*   **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
+*   **Backend**: Node.js, Express.js
+*   **Database**: MongoDB (Mongoose)
+*   **AI Integration**: Google Gemini 2.0 Flash
 *   **Icons**: Lucide React
 
 ## 🏁 Getting Started
 
 ### Prerequisites
 *   Node.js (Latest LTS recommended)
-*   NPM
+*   MongoDB (installed locally or a cloud URI)
 
 ### Installation
 
@@ -42,32 +40,63 @@ FloraVerse is a comprehensive digital ecosystem designed for plant enthusiasts. 
     cd FloraVerse
     ```
 
-2.  **Install dependencies**
+2.  **Install Frontend Dependencies**
     ```bash
     npm install
     ```
 
-3.  **Environment Setup**
-    Create a `.env` file in the root directory and add your Gemini API key:
-    ```env
-    API_KEY=your_gemini_api_key_here
+3.  **Install Backend Dependencies**
+    ```bash
+    cd server
+    npm install
+    cd ..
     ```
 
-4.  **Run Dev Server**
+4.  **Environment Setup**
+    
+    **Frontend (.env)**
+    Create a `.env` file in the root directory:
+    ```env
+    VITE_GEMINI_API_KEY=your_gemini_api_key_here
+    ```
+
+    **Backend (server/.env)**
+    Create a `.env` file in the `server` directory:
+    ```env
+    PORT=5000
+    MONGODB_URI=mongodb://localhost:27017/floraverse
+    ```
+
+5.  **Run the Application**
+
+    You need to run both the backend and frontend servers.
+
+    **Terminal 1 (Backend):**
+    ```bash
+    cd server
+    npm start
+    ```
+
+    **Terminal 2 (Frontend):**
     ```bash
     npm run dev
     ```
+    
     The application will be available at `http://localhost:5173`.
 
 ## 📂 Project Structure
 
 ```text
 src/
-├── components/      # Reusable UI components (Navbar, Cards, etc.)
-├── context/         # Store management using Context API
-├── pages/           # Page-level components (Home, Dashboards, AI Bot)
-├── services/        # External API services (Gemini integration)
+├── components/      # Reusable UI components
+├── context/         # Store management & Auth (connected to backend)
+├── pages/           # Page-level components
+├── services/        # Gemini AI integration
 └── types.ts         # TypeScript definitions
+
+server/
+├── models/          # Mongoose models (Product, Order, User)
+└── index.js         # Backend API entry point
 ```
 
 ## 📄 License
