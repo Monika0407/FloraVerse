@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 console.log("Loading config from:", path.join(__dirname, '.env'));
@@ -14,6 +15,18 @@ const User = require('./models/User');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage: storage });
 
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -71,22 +84,37 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-app.post('/api/products', async (req, res) => {
-    console.log('POST /api/products - Received Body:', req.body);
-    const product = new Product(req.body);
+app.post('/api/products', upload.single('image'), async (req, res) => {
     try {
+        const productData = { ...req.body };
+
+        // If an image was uploaded, store its permanent URL
+        if (req.file) {
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            productData.imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+        }
+
+        console.log('POST /api/products - Final Data:', productData);
+        const product = new Product(productData);
         const newProduct = await product.save();
-        console.log('Product saved successfully:', newProduct._id);
         res.status(201).json(newProduct);
     } catch (err) {
-        console.error('Error saving product to MongoDB:', err.message);
+        console.error('Error saving product:', err.message);
         res.status(400).json({ message: err.message });
     }
 });
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', upload.single('image'), async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updateData = { ...req.body };
+
+        // If a new image was uploaded, update the imageUrl
+        if (req.file) {
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+            updateData.imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(updatedProduct);
     } catch (err) {
         res.status(400).json({ message: err.message });

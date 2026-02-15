@@ -66,25 +66,27 @@ const SellerDashboard: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mockImageUrl = productForm.image
-      ? URL.createObjectURL(productForm.image)
-      : (productForm.imageUrl || 'https://picsum.photos/400/400?random=' + Math.random());
 
-    const productData = {
-      name: productForm.name,
-      category: productForm.category,
-      description: productForm.description,
-      price: parseFloat(productForm.price),
-      quantityAvailable: parseInt(productForm.quantity),
-      imageUrl: mockImageUrl
-    };
+    const formData = new FormData();
+    formData.append('name', productForm.name);
+    formData.append('category', productForm.category);
+    formData.append('description', productForm.description);
+    formData.append('price', productForm.price);
+    formData.append('quantityAvailable', productForm.quantity);
+
+    if (productForm.image) {
+      formData.append('image', productForm.image);
+    } else if (productForm.imageUrl) {
+      // Keep the existing image URL if no new image is uploaded
+      formData.append('imageUrl', productForm.imageUrl);
+    }
 
     try {
       if (editingId) {
-        await updateProduct(editingId, productData);
+        await updateProduct(editingId, formData);
         alert("Product updated successfully!");
       } else {
-        await addProduct(productData);
+        await addProduct(formData);
         alert("Product added successfully!");
       }
 
@@ -100,7 +102,8 @@ const SellerDashboard: React.FC = () => {
       setEditingId(null);
       setActiveTab('inventory');
     } catch (err) {
-      alert("Failed to save product.");
+      console.error("Submit error:", err);
+      alert("Failed to save product. Please check your connection and try again.");
     }
   };
 

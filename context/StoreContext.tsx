@@ -13,8 +13,8 @@ interface StoreContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, role: UserRole, preferences?: User['preferences']) => Promise<boolean>;
   logout: () => void;
-  addProduct: (product: Omit<Product, 'id' | 'sellerId'>) => Promise<void>;
-  updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
+  addProduct: (formData: FormData) => Promise<void>;
+  updateProduct: (id: string, formData: FormData | Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
@@ -140,13 +140,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setNotifications([]);
   };
 
-  const addProduct = async (newProductData: Omit<Product, 'id' | 'sellerId'>) => {
+  const addProduct = async (formData: FormData) => {
     if (!user || user.role !== UserRole.SELLER) return;
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/products`, {
-        ...newProductData,
-        sellerId: user.id
+      // Append sellerId if not already present in FormData
+      if (!formData.has('sellerId')) {
+        formData.append('sellerId', user.id);
+      }
+
+      const res = await axios.post(`${API_BASE_URL}/products`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       const newProduct = { ...res.data, id: res.data._id };
       setProducts(prev => [...prev, newProduct]);
@@ -158,9 +162,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const updateProduct = async (id: string, updatedData: Partial<Product>) => {
+  const updateProduct = async (id: string, data: FormData | Partial<Product>) => {
     try {
-      const res = await axios.put(`${API_BASE_URL}/products/${id}`, updatedData);
+      const isFormData = data instanceof FormData;
+      const res = await axios.put(`${API_BASE_URL}/products/${id}`, data, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+      });
       const updatedProduct = { ...res.data, id: res.data._id };
       setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
     } catch (err) {

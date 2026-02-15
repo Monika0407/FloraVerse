@@ -1,25 +1,12 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Environment variables
+.env
+server/.env
 
-node_modules
-dist
-dist-ssr
-*.local
+# Debugging scripts
+debug_dates.js
+check_orders.js
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Local Uploads
+server/uploads/*
+!server/uploads/.gitkeep
 
