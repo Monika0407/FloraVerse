@@ -1,103 +1,73 @@
 # FloraVerse 🌿
 
-FloraVerse is a comprehensive digital ecosystem designed for plant enthusiasts. It combines a vibrant marketplace for buying and selling plants with an advanced AI-powered gardening assistant to help users identify plants and diagnose diseases.
+FloraVerse is a professional, full-stack digital ecosystem for plant enthusiasts. It combines a dynamic marketplace with detailed seller analytics, administrative oversight, and a weather-integrated gardening dashboard.
 
-## 🚀 Features
+## 🚀 Key Features
 
-### 🛒 Dual-Role Marketplace
-*   **For Buyers**: Browse a curated selection of plants, seeds, and gardening tools. Integrated cart system for a seamless shopping experience.
-*   **For Sellers**: Dedicated dashboard to list products, manage inventory, and receive order notifications.
+### � Unified Management Dashboard
+*   **Role-Based Access**: A single, streamlined interface for both Sellers and Administrators.
+*   **Global Oversight (Admin)**: Administrators can monitor all system orders, track global revenue, and manage the entire product catalog.
+*   **Seller Analytics**: Individual vendors see personalized stats, active listings, and their specific transaction history.
+*   **Real-Time Analytics**: Interactive weekly sales performance graph aggregated dynamically from live system orders.
 
-### 🤖 AI Gardening Assistant (FloraBot)
-*   **Expert Advice**: Powered by Google Gemini AI to answer any gardening or botanical questions.
-*   **Plant Identification**: Upload an image to identify plant species instantly.
-*   **Disease Diagnosis**: Get organic and chemical treatment recommendations for sick plants via image analysis.
+### 🛒 Robust Marketplace
+*   **Smart Shopping**: Categorized product browsing with real-time stock tracking and search filters.
+*   **Detailed Delivery**: Comprehensive checkout flow capturing buyer names, phones, and precise delivery addresses.
+*   **Persistent Cart**: Shopping sessions are preserved across browser refreshes for a seamless user experience.
+*   **Mock Payment Integration**: Simulation of a professional payment gateway checkout flow.
 
-### ✨ Modern User Experience
-*   **Responsive Design**: Optimized for mobile, tablet, and desktop using Tailwind CSS.
-*   **Persistant State**: Uses local storage to keep your session and cart data safe across browser refreshes.
-*   **Elegant UI**: Clean, glassmorphism-inspired design with smooth transitions.
+### 🤖 Smart Gardening Dashboard (Buyer)
+*   **Weather-Integrated UI**: Real-time local weather syncing (temperature, humidity, conditions) to help buyers provide optimal care for their purchases.
+*   **Personalized Experience**: Dashboard tailored to the user's gardening preferences and shopping history.
+
+## 👥 User Roles
+
+| Role | Access Level | Key Functionalities |
+| :--- | :--- | :--- |
+| **Admin** | Superuser | View all orders, Global Revenue Tracking, Catalog-wide Management |
+| **Seller** | Vendor | List products, Personal Sales Analytics, Order Fulfillment Oversight |
+| **Buyer** | Customer | Shop, AI Assistant access, Weather-integrated gardening dashboard |
 
 ## 🛠️ Tech Stack
 
-*   **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
+*   **Frontend**: React 19, TypeScript, Tailwind CSS, Vite
 *   **Backend**: Node.js, Express.js
 *   **Database**: MongoDB (Mongoose)
-*   **AI Integration**: Google Gemini 2.0 Flash
+*   **State Management**: React Context API
+*   **Visualization**: Custom SVG/Flexbox-based Dynamic Charting
 *   **Icons**: Lucide React
 
 ## 🏁 Getting Started
 
 ### Prerequisites
-*   Node.js (Latest LTS recommended)
-*   MongoDB (installed locally or a cloud URI)
+*   Node.js (LTS version)
+*   MongoDB (Installed locally or an Atlas connection string)
 
-### Installation
+### Environment Setup
 
-1.  **Clone the repository**
-    ```bash
-    git clone <your-repo-url>
-    cd FloraVerse
-    ```
-
-2.  **Install Frontend Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Install Backend Dependencies**
-    ```bash
-    cd server
-    npm install
-    cd ..
-    ```
-
-4.  **Environment Setup**
-    
-    **Frontend (.env)**
-    Create a `.env` file in the root directory:
-    ```env
-    VITE_GEMINI_API_KEY=your_gemini_api_key_here
-    ```
-
-    **Backend (server/.env)**
-    Create a `.env` file in the `server` directory:
-    ```env
-    PORT=5000
-    MONGODB_URI=mongodb://localhost:27017/floraverse
-    ```
-
-5.  **Run the Application**
-
-    You need to run both the backend and frontend servers.
-
-    **Terminal 1 (Backend):**
-    ```bash
-    cd server
-    npm start
-    ```
-
-    **Terminal 2 (Frontend):**
-    ```bash
-    npm run dev
-    ```
-    
-    The application will be available at `http://localhost:5173`.
-
-## 📂 Project Structure
-
-```text
-src/
-├── components/      # Reusable UI components
-├── context/         # Store management & Auth (connected to backend)
-├── pages/           # Page-level components
-├── services/        # Gemini AI integration
-└── types.ts         # TypeScript definitions
-
-server/
-├── models/          # Mongoose models (Product, Order, User)
-└── index.js         # Backend API entry point
+**Frontend (.env)**
+```env
+VITE_GEMINI_API_KEY=your_gemini_key_here
 ```
 
+**Backend (server/.env)**
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/floraverse
+```
+
+### Installation & Execution
+
+1. **Install Dependencies**:
+   ```bash
+   npm install       # Root directory
+   cd server
+   npm install       # Server directory
+   ```
+
+2. **Run All Services**:
+   - **Backend**: `cd server && npm start` (Runs on port 5000)
+   - **Frontend**: `npm run dev` (Runs on port 3000 with API proxying)
+
 ## 📄 License
-This project is for educational purposes.
+This project is developed as part of the MCA curriculum.
