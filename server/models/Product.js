@@ -8,6 +8,13 @@ const productSchema = new mongoose.Schema({
   quantityAvailable: { type: Number, required: true },
   imageUrl: { type: String, required: true },
   sellerId: { type: String, required: true },
+  tags: {
+    isIndoor: { type: Boolean, default: true },
+    isOutdoor: { type: Boolean, default: true },
+    sunlight: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
+    maintenance: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
+    season: { type: String, default: 'All' }
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

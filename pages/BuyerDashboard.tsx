@@ -1,21 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ProductCategory, Product } from '../types';
-import { Search, ShoppingCart, Plus, Minus, Filter, CloudSun, Droplets, Thermometer } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, Filter, CloudSun, Droplets, Thermometer, AlertCircle, Loader2 } from 'lucide-react';
 
 const BuyerDashboard: React.FC = () => {
-  const { products, addToCart, loading } = useStore();
+  const { products, addToCart, loading, user } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  // Mock Weather Data
-  const weather = {
+  // Weather State
+  const [weather, setWeather] = useState({
     temp: 24,
-    condition: 'Partly Cloudy',
+    condition: 'Detecting...',
     humidity: 65,
     location: 'Your Garden'
-  };
+  });
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchWeather = async (lat: number, lon: number) => {
+      try {
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`
+        );
+        if (!response.ok) throw new Error('Weather data fetch failed');
+        const data = await response.json();
+
+        const weatherCodes: Record<number, string> = {
+          0: 'Clear sky',
+          1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+          45: 'Fog', 48: 'Fog',
+          51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+          61: 'Slight rain', 63: 'Rain', 65: 'Heavy rain',
+          71: 'Slight snow', 73: 'Snow', 75: 'Heavy snow',
+          80: 'Slight showers', 81: 'Showers', 82: 'Violent showers',
+          95: 'Thunderstorm',
+        };
+
+        setWeather({
+          temp: Math.round(data.current.temperature_2m),
+          condition: weatherCodes[data.current.weather_code] || 'Clear',
+          humidity: data.current.relative_humidity_2m,
+          location: 'Your Garden'
+        });
+        setWeatherLoading(false);
+        setWeatherError(null);
+      } catch (err) {
+        console.error('Error fetching weather:', err);
+        setWeatherError('Failed to sync weather');
+        setWeatherLoading(false);
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchWeather(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.warn('Geolocation denied or error:', error.message);
+          // Fallback to a default location (e.g., Delhi, India) if geolocation is unavailable
+          fetchWeather(28.6139, 77.2090);
+          setWeather(prev => ({ ...prev, location: 'General Area' }));
+        }
+      );
+    } else {
+      setWeatherError('Geolocation not supported');
+      setWeatherLoading(false);
+    }
+  }, []);
 
   // Filter Logic
   const filteredProducts = products.filter(p => {
@@ -85,29 +140,46 @@ const BuyerDashboard: React.FC = () => {
           </div>
 
           {/* Weather Widget (New Feature) */}
-          <div className="w-full md:w-1/3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-bold text-lg">{weather.location}</h3>
-                <p className="text-flora-200 text-sm">Great day for planting!</p>
+          <div className="w-full md:w-1/3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-white shadow-lg min-h-[140px] flex flex-col justify-center">
+            {weatherLoading ? (
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <Loader2 className="h-8 w-8 animate-spin text-flora-300" />
+                <p className="text-sm font-medium">Syncing local weather...</p>
               </div>
-              <CloudSun className="h-10 w-10 text-yellow-300" />
-            </div>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center">
-                <Thermometer className="h-5 w-5 mr-1 text-flora-300" />
-                <span className="text-2xl font-bold">{weather.temp}°C</span>
+            ) : weatherError ? (
+              <div className="flex items-start space-x-3 bg-red-400/20 p-3 rounded-xl border border-red-400/30">
+                <AlertCircle className="h-5 w-5 text-red-300 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-bold text-sm">Weather Unavailable</h3>
+                  <p className="text-xs text-red-100">{weatherError}</p>
+                </div>
               </div>
-              <div className="flex items-center">
-                <Droplets className="h-5 w-5 mr-1 text-blue-300" />
-                <span className="text-xl font-medium">{weather.humidity}%</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{weather.location}</h3>
+                    <p className="text-flora-200 text-sm">{weather.condition} • Today</p>
+                  </div>
+                  <CloudSun className="h-10 w-10 text-yellow-300" />
+                </div>
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center">
+                    <Thermometer className="h-5 w-5 mr-1 text-flora-300" />
+                    <span className="text-2xl font-bold">{weather.temp}°C</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Droplets className="h-5 w-5 mr-1 text-blue-300" />
+                    <span className="text-xl font-medium">{weather.humidity}%</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Product Grid */}
+      {/* Shop Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>

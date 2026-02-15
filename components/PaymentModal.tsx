@@ -132,7 +132,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onPaymentC
                                                 disabled={isProcessing}
                                                 className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-flora-600 text-base font-medium text-white hover:bg-flora-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-flora-500 sm:col-start-2 sm:text-sm disabled:opacity-50"
                                             >
-                                                {isProcessing ? 'Processing...' : `Pay ₹{amount.toFixed(2)}`}
+                                                {isProcessing ? 'Processing...' : `Pay ₹${amount.toFixed(2)}`}
                                             </button>
                                             <button
                                                 type="button"

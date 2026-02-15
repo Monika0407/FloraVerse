@@ -103,6 +103,15 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 
 // Order Routes
+app.get('/api/orders', async (req, res) => {
+    try {
+        const orders = await Order.find();
+        res.json(orders);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 app.get('/api/orders/:sellerId', async (req, res) => {
     try {
         const orders = await Order.find({ sellerId: req.params.sellerId });
@@ -113,8 +122,8 @@ app.get('/api/orders/:sellerId', async (req, res) => {
 });
 
 app.post('/api/orders', async (req, res) => {
-    const order = new Order(req.body);
     try {
+        const order = new Order(req.body);
         const newOrder = await order.save();
         res.status(201).json(newOrder);
     } catch (err) {

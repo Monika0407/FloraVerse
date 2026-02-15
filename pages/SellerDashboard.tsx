@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { ProductCategory } from '../types';
 import { PlusCircle, Bell, DollarSign, Package, Upload, LayoutDashboard, Tag, TrendingUp, IndianRupee } from 'lucide-react';
 
 const SellerDashboard: React.FC = () => {
-  const { user, products, addProduct, updateProduct, deleteProduct, notifications, loading } = useStore();
+  const { user, products, addProduct, updateProduct, deleteProduct, notifications, loading, fetchNotifications } = useStore();
   const [activeTab, setActiveTab] = useState<'add' | 'inventory' | 'notifications' | 'analytics'>('inventory');
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   // Form State
   const [productForm, setProductForm] = useState({
@@ -21,17 +25,19 @@ const SellerDashboard: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  if (!user || user.role !== 'seller') {
+  if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
           <div className="text-red-500 mb-4 mx-auto w-12 h-12"><LayoutDashboard className="w-full h-full" /></div>
           <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
-          <p className="text-gray-500 mt-2">You need a seller account to view this page.</p>
+          <p className="text-gray-500 mt-2">You need a seller or admin account to view this page.</p>
         </div>
       </div>
     );
   }
+
+  const isAdmin = user.role === 'admin';
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -118,13 +124,46 @@ const SellerDashboard: React.FC = () => {
     }
   };
 
-  const sellerProducts = products.filter(p => p.sellerId === user.id);
-  const userNotifications = notifications.filter(n => n.sellerId === user.id);
+  // Role-based data filtering
+  const sellerProducts = isAdmin ? products : products.filter(p => p.sellerId === user.id);
+  const userNotifications = notifications; // notifications are already filtered by StoreContext based on role
   const totalSales = userNotifications.reduce((acc, curr) => acc + curr.totalPrice, 0);
 
-  // Mock Sales Data for Chart
-  const salesData = [3000, 4500, 2000, 6000, 7500, 5000, 9000];
-  const maxSale = Math.max(...salesData);
+  // Dynamic Sales Data for Graph (Last 7 Days)
+  const getLast7Days = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(`${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`);
+    }
+    return days;
+  };
+
+  const last7Days = getLast7Days();
+  const salesData = last7Days.map(dateStr => {
+    // Standardize comparison to DD/MM by stripping the year part
+    const targetBase = dateStr.split('/').slice(0, 2).join('/');
+
+    return userNotifications
+      .filter(n => {
+        const orderBase = String(n.date || '').split('/').slice(0, 2).join('/');
+        return orderBase === targetBase;
+      })
+      .reduce((sum, n) => {
+        const price = parseFloat(String(n.totalPrice)) || 0;
+        return sum + price;
+      }, 0);
+  });
+
+  // Debug log to trace data (visible in browser F12 console)
+  console.log('Analytics Debug:', {
+    dates: last7Days,
+    orderDates: userNotifications.map(n => n.date),
+    calculatedSales: salesData
+  });
+
+  const maxSale = Math.max(...salesData, 100); // Default to 100 to avoid division by zero
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -133,7 +172,7 @@ const SellerDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="bg-flora-100 p-2 rounded-lg"><LayoutDashboard className="h-6 w-6 text-flora-700" /></div>
-            <h1 className="text-2xl font-bold text-gray-900 font-serif">Seller Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900 font-serif">{isAdmin ? 'Admin Management' : 'Seller Dashboard'}</h1>
           </div>
           <div className="flex space-x-2 bg-gray-100 p-1 rounded-xl">
             <button
@@ -175,22 +214,22 @@ const SellerDashboard: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><IndianRupee className="h-6 w-6" /></div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Total Revenue</p>
+              <p className="text-sm text-gray-500 font-medium">{isAdmin ? 'Global Revenue' : 'Total Revenue'}</p>
               <p className="text-2xl font-bold text-gray-900">₹{totalSales.toFixed(2)}</p>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
             <div className="p-3 bg-purple-50 text-purple-600 rounded-xl"><Package className="h-6 w-6" /></div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Total Orders</p>
+              <p className="text-sm text-gray-500 font-medium">{isAdmin ? 'Total System Orders' : 'Total Orders'}</p>
               <p className="text-2xl font-bold text-gray-900">{userNotifications.length}</p>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
             <div className="p-3 bg-green-50 text-green-600 rounded-xl"><Tag className="h-6 w-6" /></div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Active Listings</p>
-              <p className="text-2xl font-bold text-gray-900">{sellerProducts.length}</p>
+              <p className="text-sm text-gray-500 font-medium">{isAdmin ? 'Global Catalog' : 'Active Listings'}</p>
+              <p className="text-2xl font-bold text-gray-900">{isAdmin ? products.length : sellerProducts.length}</p>
             </div>
           </div>
         </div>
@@ -199,19 +238,24 @@ const SellerDashboard: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Weekly Sales Performance</h2>
             <div className="h-64 flex items-end justify-between gap-4">
-              {salesData.map((value, index) => (
-                <div key={index} className="w-full flex flex-col items-center">
-                  <div
-                    className="w-full bg-flora-500 rounded-t-md hover:bg-flora-600 transition-all relative group"
-                    style={{ height: `${(value / maxSale) * 100}%` }}
-                  >
-                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₹{value}
+              {salesData.map((value, index) => {
+                const heightPercent = Math.min(100, (value / maxSale) * 100);
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center group h-full justify-end">
+                    <div
+                      className="w-full max-w-[40px] bg-flora-500 rounded-t-md hover:bg-flora-600 transition-all relative"
+                      style={{ height: `${heightPercent || (value > 0 ? 2 : 0)}%` }}
+                    >
+                      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                        ₹{value.toLocaleString()}
+                      </div>
                     </div>
+                    <span className="text-[10px] text-gray-400 mt-2 font-medium">
+                      {last7Days[index].split('/').slice(0, 2).join('/')}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500 mt-2">Day {index + 1}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -446,6 +490,7 @@ const SellerDashboard: React.FC = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Delivery Address</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
@@ -464,6 +509,19 @@ const SellerDashboard: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{notif.productName}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{notif.quantity}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">₹{notif.totalPrice.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {notif.deliveryAddress ? (
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-gray-800">{notif.deliveryAddress.name}</span>
+                              <span className="text-xs">{notif.deliveryAddress.phone}</span>
+                              <span className="text-xs mt-1 leading-tight">
+                                {notif.deliveryAddress.addressLine}, {notif.deliveryAddress.city} - {notif.deliveryAddress.pincode}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="italic text-gray-400">N/A</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                             Paid

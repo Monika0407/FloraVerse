@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole, Product, CartItem, Notification, ProductCategory } from '../types';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 
 interface StoreContextType {
   user: User | null;
@@ -11,14 +11,15 @@ interface StoreContextType {
   notifications: Notification[];
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: UserRole, preferences?: User['preferences']) => Promise<boolean>;
   logout: () => void;
   addProduct: (product: Omit<Product, 'id' | 'sellerId'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
-  placeOrder: (paymentDetails: any) => Promise<boolean>;
+  placeOrder: (paymentDetails: any, deliveryAddress: any) => Promise<boolean>;
+  fetchNotifications: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -71,9 +72,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Fetch orders/notifications for seller
-  const fetchNotifications = async (sellerId: string) => {
+  const fetchNotifications = async () => {
+    if (!user) return;
     try {
-      const res = await axios.get(`${API_BASE_URL}/orders/${sellerId}`);
+      // If admin, fetch all orders, else fetch seller-specific orders
+      const url = user.role === UserRole.ADMIN
+        ? `${API_BASE_URL}/orders`
+        : `${API_BASE_URL}/orders/${user.id}`;
+
+      const res = await axios.get(url);
       setNotifications(res.data.map((n: any) => ({ ...n, id: n._id })));
     } catch (err) {
       console.error("Error fetching orders", err);
@@ -85,8 +92,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   useEffect(() => {
-    if (user && user.role === UserRole.SELLER) {
-      fetchNotifications(user.id);
+    if (user && (user.role === UserRole.SELLER || user.role === UserRole.ADMIN)) {
+      fetchNotifications();
     }
   }, [user]);
 
@@ -115,9 +122,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: UserRole): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: UserRole, preferences?: User['preferences']): Promise<boolean> => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password, role });
+      const res = await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password, role, preferences });
       const user = { ...res.data, id: res.data._id };
       setUser(user);
       return true;
@@ -192,7 +199,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const placeOrder = async (paymentDetails: any): Promise<boolean> => {
+  const placeOrder = async (paymentDetails: any, deliveryAddress: any): Promise<boolean> => {
     if (!user) return false;
 
     try {
@@ -204,9 +211,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           productName: item.name,
           quantity: item.quantityOrdered,
           totalPrice: item.price * item.quantityOrdered,
-          date: new Date().toLocaleDateString(),
+          date: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
           paymentStatus: 'Paid',
-          transactionId: paymentDetails.transactionId
+          transactionId: paymentDetails.transactionId,
+          razorpayOrderId: paymentDetails.razorpayOrderId || paymentDetails.transactionId, // Fallback if rzp_order_id not provied
+          deliveryAddress: deliveryAddress
         });
 
         // Update product quantity in backend
@@ -216,6 +225,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       await fetchProducts(); // Refresh local product list
+      await fetchNotifications();
+
       setCart([]);
       return true;
     } catch (err) {
@@ -239,7 +250,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       deleteProduct,
       addToCart,
       removeFromCart,
-      placeOrder
+      placeOrder,
+      fetchNotifications
     }}>
       {children}
     </StoreContext.Provider>

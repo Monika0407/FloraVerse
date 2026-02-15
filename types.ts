@@ -1,6 +1,7 @@
 export enum UserRole {
   BUYER = 'buyer',
   SELLER = 'seller',
+  ADMIN = 'admin',
 }
 
 export interface User {
@@ -8,7 +9,13 @@ export interface User {
   name: string;
   role: UserRole;
   email: string;
-  password?: string; // Storing strictly for mock auth purposes in local storage
+  password?: string;
+  preferences?: {
+    indoorOutdoor: 'Indoor' | 'Outdoor' | 'Both';
+    sunlight: 'Low' | 'Medium' | 'High';
+    experience: 'Beginner' | 'Intermediate' | 'Expert';
+    location: string;
+  };
 }
 
 export enum ProductCategory {
@@ -27,10 +34,25 @@ export interface Product {
   price: number;
   quantityAvailable: number;
   imageUrl: string;
+  tags?: {
+    isIndoor: boolean;
+    isOutdoor: boolean;
+    sunlight: 'Low' | 'Medium' | 'High';
+    maintenance: 'Low' | 'Medium' | 'High';
+    season: string;
+  };
 }
 
 export interface CartItem extends Product {
   quantityOrdered: number;
+}
+
+export interface DeliveryAddress {
+  name: string;
+  phone: string;
+  addressLine: string;
+  city: string;
+  pincode: string;
 }
 
 export interface Notification {
@@ -41,6 +63,7 @@ export interface Notification {
   quantity: number;
   totalPrice: number;
   date: string;
+  deliveryAddress?: DeliveryAddress;
 }
 
 export interface ChatMessage {
