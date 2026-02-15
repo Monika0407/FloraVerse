@@ -3,17 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 
+import PaymentModal from '../components/PaymentModal';
+
 const Cart: React.FC = () => {
   const { cart, removeFromCart, placeOrder, user } = useStore();
-  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false);
   const navigate = useNavigate();
 
   const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantityOrdered), 0);
 
-  const handleCheckout = async () => {
-    setIsProcessing(true);
-    const success = await placeOrder();
-    setIsProcessing(false);
+  const handlePaymentComplete = async (paymentDetails: any) => {
+    const success = await placeOrder(paymentDetails);
     if (success) {
       alert("Payment Successful! Your order has been placed.");
       navigate('/buyer-dashboard');
@@ -81,11 +81,10 @@ const Cart: React.FC = () => {
               Shipping and taxes calculated at checkout.
             </p>
             <button
-              onClick={handleCheckout}
-              disabled={isProcessing}
-              className={`w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white ${isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-flora-600 hover:bg-flora-700'}`}
+              onClick={() => setIsPaymentModalOpen(true)}
+              className={`w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-flora-600 hover:bg-flora-700`}
             >
-              {isProcessing ? 'Processing Payment...' : 'Proceed to Payment'}
+              Proceed to Payment
             </button>
             <div className="mt-6 flex justify-center text-sm text-center text-gray-500">
               <p>
@@ -98,6 +97,13 @@ const Cart: React.FC = () => {
           </div>
         </div>
       )}
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentComplete={handlePaymentComplete}
+        amount={totalAmount}
+      />
     </div>
   );
 };

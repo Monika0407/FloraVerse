@@ -1,7 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+console.log("Loading config from:", path.join(__dirname, '.env'));
+console.log("MONGODB_URI is:", process.env.MONGODB_URI ? "DEFINED" : "UNDEFINED");
 
 const Product = require('./models/Product');
 const Order = require('./models/Order');

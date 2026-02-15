@@ -18,7 +18,7 @@ interface StoreContextType {
   deleteProduct: (id: string) => Promise<void>;
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (productId: string) => void;
-  placeOrder: () => Promise<boolean>;
+  placeOrder: (paymentDetails: any) => Promise<boolean>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -192,14 +192,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const placeOrder = async (): Promise<boolean> => {
+  const placeOrder = async (paymentDetails: any): Promise<boolean> => {
     if (!user) return false;
-
-    // MOCK PAYMENT INTEGRATION
-    // In a real app, you would integrate Stripe here
-    const paymentSuccessful = await new Promise(resolve => setTimeout(() => resolve(true), 1500));
-
-    if (!paymentSuccessful) return false;
 
     try {
       // Create orders in backend
@@ -210,7 +204,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           productName: item.name,
           quantity: item.quantityOrdered,
           totalPrice: item.price * item.quantityOrdered,
-          date: new Date().toLocaleDateString()
+          date: new Date().toLocaleDateString(),
+          paymentStatus: 'Paid',
+          transactionId: paymentDetails.transactionId
         });
 
         // Update product quantity in backend
