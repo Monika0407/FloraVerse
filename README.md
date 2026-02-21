@@ -4,11 +4,10 @@ FloraVerse is a professional, full-stack digital ecosystem for plant enthusiasts
 
 ## 🚀 Key Features
 
-### � Unified Management Dashboard
-*   **Role-Based Access**: A single, streamlined interface for both Sellers and Administrators.
-*   **Global Oversight (Admin)**: Administrators can monitor all system orders, track global revenue, and manage the entire product catalog.
-*   **Seller Analytics**: Individual vendors see personalized stats, active listings, and their specific transaction history.
-*   **Real-Time Analytics**: Interactive weekly sales performance graph aggregated dynamically from live system orders.
+### 💹 Unified Management Dashboard
+*   **Role-Based Access**: Single-interface functionality for Sellers and System Administrators.
+*   **Global Oversight**: Monitor system-wide orders, track revenue metrics, and manage catalog listings.
+*   **Real-Time Analytics**: Visual tracking of weekly sales performance.
 
 ### 🛒 Robust Marketplace
 *   **Smart Shopping**: Categorized product browsing with real-time stock tracking and search filters.
@@ -24,9 +23,9 @@ FloraVerse is a professional, full-stack digital ecosystem for plant enthusiasts
 
 | Role | Access Level | Key Functionalities |
 | :--- | :--- | :--- |
-| **Admin** | Superuser | View all orders, Global Revenue Tracking, Catalog-wide Management |
-| **Seller** | Vendor | List products, Personal Sales Analytics, Order Fulfillment Oversight |
-| **Buyer** | Customer | Shop, AI Assistant access, Weather-integrated gardening dashboard |
+| **Admin** | Superuser | View all orders, Global Revenue Tracking, Catalog Management |
+| **Seller** | Vendor | List products, Personal Sales Analytics, Order Fulfillment |
+| **Buyer** | Customer | Shop, AI Assistant access, Weather-integrated dashboard |
 
 ## 🛠️ Tech Stack
 
