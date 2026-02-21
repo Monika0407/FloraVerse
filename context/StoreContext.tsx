@@ -58,9 +58,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const res = await axios.get(`${API_BASE_URL}/products`);
       // Map MongoDB _id to id for frontend consistency
       if (res.data && Array.isArray(res.data)) {
-        const mappedProducts = res.data.map((p: any) => ({ ...p, id: p._id }));
+        console.log(`Fetched ${res.data.length} products from ${API_BASE_URL}`);
+        const mappedProducts = res.data.map((p: any) => ({
+          ...p,
+          id: p._id,
+          imageUrl: p.imageUrl
+        }));
         setProducts(mappedProducts);
       } else {
+        console.warn("Received empty product list or invalid data format");
         setProducts([]);
       }
     } catch (err) {

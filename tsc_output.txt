@@ -1,4 +1,0 @@
-App.tsx(15,10): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
-App.tsx(24,14): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
-App.tsx(29,53): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
-App.tsx(35,17): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.

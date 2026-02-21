@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
-import { UserRole } from '../types';
+import { useStore } from '../StoreContext';
+import { UserRole } from '../../types';
 import { Sprout, LogOut, ShoppingCart, MessageCircle, User as UserIcon, ChevronDown, Menu, X } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -147,24 +147,52 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
-          <div className="px-4 pt-2 pb-6 space-y-2">
-            <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Home</Link>
-            <Link to="/ai-assistant" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">AI Assistant</Link>
-            {!user && (
-              <>
-                <Link to="/auth?role=buyer" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Login as Buyer</Link>
-                <Link to="/auth?role=seller" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Login as Seller</Link>
-              </>
-            )}
-            {user && (
-              <button onClick={handleLogout} className="block w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md">Logout</button>
-            )}
+      {
+        isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            <div className="px-4 pt-2 pb-6 space-y-2">
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Home</Link>
+              <Link to="/ai-assistant" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">AI Assistant</Link>
+              {!user && (
+                <>
+                  <Link to="/auth?role=buyer" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Login as Buyer</Link>
+                  <Link to="/auth?role=seller" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md">Login as Seller</Link>
+                </>
+              )}
+              {user && (
+                <>
+                  {(user.role === UserRole.SELLER || user.role === UserRole.ADMIN) && (
+                    <Link
+                      to="/seller-dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md"
+                    >
+                      Seller Dashboard
+                    </Link>
+                  )}
+                  {user.role === UserRole.BUYER && (
+                    <Link
+                      to="/buyer-dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-flora-50 rounded-md"
+                    >
+                      Buyer Dashboard
+                    </Link>
+                  )}
+                  <div className="h-px bg-gray-100 my-2"></div>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </nav>
+        )
+      }
+    </nav >
   );
 };
 

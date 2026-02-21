@@ -15,7 +15,7 @@ const Chatbot: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -44,7 +44,7 @@ const Chatbot: React.FC = () => {
           const base64 = reader.result.split(',')[1];
           resolve(base64);
         } else {
-            reject(new Error("Failed to read file"));
+          reject(new Error("Failed to read file"));
         }
       };
       reader.readAsDataURL(file);
@@ -71,31 +71,31 @@ const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-        let imageBase64: string | undefined = undefined;
-        if (selectedImage) {
-            imageBase64 = await fileToGenerativePart(selectedImage);
-        }
+      let imageBase64: string | undefined = undefined;
+      if (selectedImage) {
+        imageBase64 = await fileToGenerativePart(selectedImage);
+      }
 
-        // Pass the history and the new message details separately
-        const responseText = await generateChatResponse(currentHistory, newMessage.text, imageBase64);
+      // Pass the history and the new message details separately
+      const responseText = await generateChatResponse(currentHistory, newMessage.text, imageBase64);
 
-        const botMsgId = Math.random().toString(36).substr(2, 9);
-        setMessages(prev => [...prev, {
-            id: botMsgId,
-            role: 'model',
-            text: responseText
-        }]);
+      const botMsgId = Math.random().toString(36).substr(2, 9);
+      setMessages(prev => [...prev, {
+        id: botMsgId,
+        role: 'model',
+        text: responseText
+      }]);
 
     } catch (error) {
-        setMessages(prev => [...prev, {
-            id: 'error',
-            role: 'model',
-            text: "Sorry, I encountered an error processing your request."
-        }]);
+      setMessages(prev => [...prev, {
+        id: 'error',
+        role: 'model',
+        text: "Sorry, I encountered an error processing your request."
+      }]);
     } finally {
-        setIsLoading(false);
-        setSelectedImage(null);
-        setPreviewUrl(null);
+      setIsLoading(false);
+      setSelectedImage(null);
+      setPreviewUrl(null);
     }
   };
 
@@ -103,10 +103,9 @@ const Chatbot: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-100">
       <div className="bg-white shadow-sm py-4 px-6 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-            <Bot className="text-flora-600 h-6 w-6" />
-            <h1 className="text-xl font-bold text-gray-800">FloraBot Assistant</h1>
+          <Bot className="text-flora-600 h-6 w-6" />
+          <h1 className="text-xl font-bold text-gray-800">FloraBot Assistant</h1>
         </div>
-        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">Powered by Gemini AI</span>
       </div>
 
       {/* Messages Area */}
@@ -120,12 +119,11 @@ const Chatbot: React.FC = () => {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-flora-600' : 'bg-gray-700'}`}>
                 {msg.role === 'user' ? <User className="h-5 w-5 text-white" /> : <Bot className="h-5 w-5 text-white" />}
               </div>
-              
-              <div className={`p-4 rounded-lg shadow-sm ${
-                msg.role === 'user' 
-                  ? 'bg-flora-500 text-white rounded-br-none' 
+
+              <div className={`p-4 rounded-lg shadow-sm ${msg.role === 'user'
+                  ? 'bg-flora-500 text-white rounded-br-none'
                   : 'bg-white text-gray-800 rounded-bl-none'
-              }`}>
+                }`}>
                 {msg.image && (
                   <img src={msg.image} alt="User upload" className="mb-2 max-w-full rounded-md max-h-64 object-cover" />
                 )}
@@ -136,12 +134,12 @@ const Chatbot: React.FC = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-             <div className="bg-white p-4 rounded-lg rounded-bl-none shadow-sm ml-10">
-                <div className="flex items-center space-x-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-flora-500" />
-                    <span className="text-gray-500 text-sm">Analyzing...</span>
-                </div>
-             </div>
+            <div className="bg-white p-4 rounded-lg rounded-bl-none shadow-sm ml-10">
+              <div className="flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin text-flora-500" />
+                <span className="text-gray-500 text-sm">Analyzing...</span>
+              </div>
+            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -150,22 +148,22 @@ const Chatbot: React.FC = () => {
       {/* Input Area */}
       <div className="bg-white p-4 border-t border-gray-200">
         {previewUrl && (
-            <div className="mb-2 inline-block relative">
-                <img src={previewUrl} alt="Preview" className="h-20 w-20 object-cover rounded-md border border-gray-300" />
-                <button 
-                    onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
-                >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
+          <div className="mb-2 inline-block relative">
+            <img src={previewUrl} alt="Preview" className="h-20 w-20 object-cover rounded-md border border-gray-300" />
+            <button
+              onClick={() => { setSelectedImage(null); setPreviewUrl(null); }}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
         )}
         <div className="flex items-center space-x-2 max-w-4xl mx-auto">
           <label className="cursor-pointer p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-flora-600 transition">
             <ImageIcon className="h-6 w-6" />
             <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           </label>
-          
+
           <input
             type="text"
             className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-flora-500 focus:border-transparent"
@@ -175,7 +173,7 @@ const Chatbot: React.FC = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             disabled={isLoading}
           />
-          
+
           <button
             onClick={handleSend}
             disabled={isLoading || (!input.trim() && !selectedImage)}

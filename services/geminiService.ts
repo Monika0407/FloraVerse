@@ -106,3 +106,4 @@ Keep responses concise, structured, and helpful for a home gardener.`
     return "Sorry, I'm having trouble connecting to the AI right now. Please check your connection or try again later.";
   }
 };
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ProductCategory } from '../types';
+import { ProductCategory, UserRole } from '../types';
 import { PlusCircle, Bell, DollarSign, Package, Upload, LayoutDashboard, Tag, TrendingUp, IndianRupee } from 'lucide-react';
 
 const SellerDashboard: React.FC = () => {
@@ -25,7 +25,7 @@ const SellerDashboard: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
+  if (!user || (user.role !== UserRole.SELLER && user.role !== UserRole.ADMIN)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-2xl shadow-xl">

@@ -7,7 +7,7 @@ import { Sprout, ArrowRight, UserCircle, Store, AlertCircle } from 'lucide-react
 const Auth: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, register, user } = useStore();
+  const { login, register, logout, user } = useStore();
 
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState<UserRole>(UserRole.BUYER);
@@ -33,8 +33,11 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      if (user.role === UserRole.SELLER) navigate('/seller-dashboard');
-      else navigate('/buyer-dashboard');
+      if (user.role === UserRole.SELLER || user.role === UserRole.ADMIN) {
+        navigate('/seller-dashboard');
+      } else {
+        navigate('/buyer-dashboard');
+      }
     }
   }, [user, navigate]);
 
@@ -112,6 +115,8 @@ const Auth: React.FC = () => {
               {isLogin ? 'Sign in to access your dashboard.' : `Register as a ${role} to get started.`}
             </p>
           </div>
+
+
 
           {error && (
             <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 flex items-center">
@@ -199,7 +204,7 @@ const Auth: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -53,7 +53,12 @@ app.post('/api/auth/register', async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
-        const user = new User({ name, email, password, role });
+        const user = new User({
+            name,
+            email,
+            password,
+            role: role || 'buyer'
+        });
         const newUser = await user.save();
         res.status(201).json(newUser);
     } catch (err) {

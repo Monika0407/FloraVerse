@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext';
 import { Trash2, ShoppingBag, ArrowLeft, MapPin, Phone, User as UserIcon } from 'lucide-react';
 import { DeliveryAddress } from '../types';
 
-import PaymentModal from '../components/PaymentModal';
+import PaymentModal from '../context/components/PaymentModal';
 
 const Cart: React.FC = () => {
   const { cart, removeFromCart, placeOrder, user } = useStore();
