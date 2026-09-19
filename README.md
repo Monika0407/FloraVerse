@@ -68,5 +68,4 @@ MONGODB_URI=mongodb://localhost:27017/floraverse
    - **Backend**: `cd server && npm start` (Runs on port 5000)
    - **Frontend**: `npm run dev` (Runs on port 3000 with API proxying)
 
-## 📄 License
-This project is developed as part of the MCA curriculum.
+
